@@ -52,7 +52,7 @@ export function createApp(options = {}) {
   });
 
   app.setNotFoundHandler((request, reply) => reply.code(404).send({
-    erro: 'Rota não encontrada', codigo: 'ROTA_NAO_ENCONTRADA', detalhes: [],
+    erro: 'Rota não encontrada por aqui', codigo: 'ROTA_NAO_ENCONTRADA', detalhes: [],
   }));
 
   app.get('/health', { schema: { hide: true } }, async () => {
