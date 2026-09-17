@@ -1,0 +1,64 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sige
+      POSTGRES_PASSWORD: sige
+      POSTGRES_DB: sige_produtos
+    ports:
+      - "${POSTGRES_PORT_HOST:-5433}:5432"
+    volumes:
+      - sige_produtos_dados:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sige -d sige_produtos"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  migrate:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      DATABASE_URL: postgresql://sige:sige@postgres:5432/sige_produtos
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: sh -c "node src/scripts/migrar.js && node src/scripts/semear.js"
+    restart: "no"
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://sige:sige@postgres:5432/sige_produtos
+      PORT: 3000
+      LOG_LEVEL: info
+      PERMITIR_EXCLUSAO_FISICA: "false"
+      BCRYPT_CUSTO: 10
+      CORS_ORIGIN: ${FRONTEND_ORIGEM:-http://localhost:8080}
+    ports:
+      - "${BACKEND_PORT_HOST:-3000}:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://localhost:3000}
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT_HOST:-8080}:80"
+    depends_on:
+      - backend
+
+volumes:
+  sige_produtos_dados:
