@@ -6,13 +6,14 @@ import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { produtoRoutes } from './routes/produto.routes.js';
 import { openapi } from './openapi.js';
-import { pool } from './db.js';
+import { db } from './database/index.js';
 import { ApiError } from './http.js';
+import { env } from './config/env.js';
 
 export function createApp(options = {}) {
   const app = Fastify(options);
 
-  app.register(cors, { origin: process.env.CORS_ORIGIN?.split(',') ?? false });
+  app.register(cors, { origin: env.corsOrigin });
   app.register(helmet);
   app.register(swagger, { mode: 'static', specification: { document: openapi } });
   app.register(swaggerUi, { routePrefix: '/docs' });
@@ -34,6 +35,7 @@ export function createApp(options = {}) {
         produto_sku_key: ['SKU_DUPLICADO', 'SKU já cadastrado'],
         categoria_nome_key: ['CATEGORIA_DUPLICADA', 'Categoria já cadastrada'],
         unidade_medida_sigla_key: ['SIGLA_DUPLICADA', 'Sigla já cadastrada'],
+        usuario_email_key: ['EMAIL_DUPLICADO', 'Email já cadastrado'],
       };
       const [codigo, mensagem] = conflitos[error.constraint] ?? ['REGISTRO_DUPLICADO', 'Registro duplicado'];
       return reply.code(409).send({ erro: mensagem, codigo, detalhes: [] });
@@ -56,7 +58,7 @@ export function createApp(options = {}) {
   }));
 
   app.get('/health', { schema: { hide: true } }, async () => {
-    await pool.query('SELECT 1');
+    await db.query('SELECT 1');
     return { status: 'ok' };
   });
   app.register(produtoRoutes);

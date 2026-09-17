@@ -54,6 +54,17 @@ export const openapi = {
         motivo: { type: 'string', nullable: true }, usuario_id: { type: 'integer', nullable: true },
       } },
       Erro: { type: 'object', properties: { erro: { type: 'string' }, codigo: { type: 'string' }, detalhes: { type: 'array', items: {} } } },
+      UsuarioEntrada: { type: 'object', required: ['nome', 'email', 'senha'], properties: {
+        nome: { type: 'string', maxLength: 60 }, email: { type: 'string', format: 'email', maxLength: 100 },
+        senha: { type: 'string', minLength: 4, maxLength: 50 },
+      } },
+      LoginEntrada: { type: 'object', required: ['email', 'senha'], properties: {
+        email: { type: 'string', format: 'email', maxLength: 100 }, senha: { type: 'string' },
+      } },
+      Usuario: { type: 'object', properties: {
+        id: { type: 'integer' }, nome: { type: 'string' }, email: { type: 'string' },
+        criado_em: { type: 'string', format: 'date' }, atualizado_em: { type: 'string', format: 'date' },
+      } },
     },
   },
   paths: {
@@ -99,6 +110,14 @@ export const openapi = {
       get: { tags: ['Unidades'], summary: 'Listar unidades', responses: { 200: resposta('Unidades') } },
       post: { tags: ['Unidades'], summary: 'Cadastrar unidade', security: seguranca, requestBody: corpo('UnidadeEntrada'),
         responses: { 201: resposta('Unidade criada') } },
+    },
+    '/api/usuarios': {
+      post: { tags: ['Usuários'], summary: 'Cadastrar usuário', description: 'Verificação simples: sem hash de senha e sem token de acesso.',
+        requestBody: corpo('UsuarioEntrada'), responses: { 201: resposta('Usuário criado'), 409: resposta('Email duplicado'), 422: resposta('Dados inválidos') } },
+    },
+    '/api/usuarios/login': {
+      post: { tags: ['Usuários'], summary: 'Login simples por email e senha', description: 'Devolve o usuário (com o id) se email e senha baterem. Sem token de acesso.',
+        requestBody: corpo('LoginEntrada'), responses: { 200: resposta('Usuário autenticado'), 401: resposta('Email ou senha incorretos') } },
     },
   },
 };

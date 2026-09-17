@@ -33,7 +33,7 @@ CREATE TABLE produto (
 CREATE TABLE usuario (
   id integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
   nome varchar(60) NOT NULL,
-  email varchar(100) NOT NULL,
+  email varchar(100) NOT NULL UNIQUE,
   senha varchar(50) NOT NULL,
   criado_em date NOT NULL DEFAULT current_date,
   atualizado_em date NOT NULL DEFAULT current_date

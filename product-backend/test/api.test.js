@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createApp } from '../src/app.js';
-import { pool } from '../src/db.js';
+import { db } from '../src/database/index.js';
 
 process.env.OPERADOR_API_KEY = 'operador_teste';
 process.env.GESTOR_API_KEY = 'gestor_teste';
@@ -51,8 +51,8 @@ test('OpenAPI descreve os campos preço e estoque', async () => {
 
 test('cadastro grava produto e preço inicial na mesma transação', async () => {
   const chamadas = [];
-  const conectarOriginal = pool.connect;
-  pool.connect = async () => ({
+  const conectarOriginal = db.pool.connect;
+  db.pool.connect = async () => ({
     query: async (sql, valores = []) => {
       chamadas.push({ sql, valores });
       if (sql.includes('SELECT id FROM categoria')) return { rowCount: 1 };
@@ -75,7 +75,7 @@ test('cadastro grava produto e preço inicial na mesma transação', async () =>
     assert.ok(chamadas.some(({ sql }) => sql.includes('INSERT INTO produto_preco_historico')));
     assert.ok(chamadas.some(({ sql }) => sql === 'COMMIT'));
   } finally {
-    pool.connect = conectarOriginal;
+    db.pool.connect = conectarOriginal;
   }
 });
 
@@ -86,10 +86,71 @@ test('operador não pode alterar preço', async () => {
   assert.equal(resposta.statusCode, 403);
 });
 
+test('cadastro de usuário valida email e senha', async () => {
+  const resposta = await requisitar({ method: 'POST', url: '/api/usuarios',
+    payload: { nome: 'Ana', email: 'nao-e-email', senha: '123' },
+  });
+  assert.equal(resposta.statusCode, 422);
+  const campos = resposta.json().detalhes.map((item) => item.path[0]);
+  assert.ok(campos.includes('email'));
+  assert.ok(campos.includes('senha'));
+});
+
+test('cadastro de usuário não exige chave de API', async () => {
+  const consultaOriginal = db.query;
+  db.query = async (sql, valores = []) => {
+    if (sql.includes('INSERT INTO usuario')) {
+      return { rows: [{ id: 1, nome: valores[0], email: valores[1], criado_em: '2026-01-01', atualizado_em: '2026-01-01' }] };
+    }
+    return { rowCount: 0, rows: [] };
+  };
+  try {
+    const resposta = await requisitar({ method: 'POST', url: '/api/usuarios',
+      payload: { nome: 'Ana Silva', email: 'Ana@Exemplo.com', senha: 'senha123' },
+    });
+    assert.equal(resposta.statusCode, 201);
+    // o email deve ser normalizado para minúsculo antes de ir para o banco.
+    assert.equal(resposta.json().email, 'ana@exemplo.com');
+    // a senha nunca deve aparecer na resposta.
+    assert.equal(resposta.json().senha, undefined);
+  } finally {
+    db.query = consultaOriginal;
+  }
+});
+
+test('login com credenciais inválidas retorna 401', async () => {
+  const consultaOriginal = db.query;
+  db.query = async () => ({ rows: [] });
+  try {
+    const resposta = await requisitar({ method: 'POST', url: '/api/usuarios/login',
+      payload: { email: 'ana@exemplo.com', senha: 'errada' },
+    });
+    assert.equal(resposta.statusCode, 401);
+    assert.equal(resposta.json().codigo, 'CREDENCIAIS_INVALIDAS');
+  } finally {
+    db.query = consultaOriginal;
+  }
+});
+
+test('login com credenciais corretas devolve o id do usuário, sem token', async () => {
+  const consultaOriginal = db.query;
+  db.query = async () => ({ rows: [{ id: 7, nome: 'Ana Silva', email: 'ana@exemplo.com', criado_em: '2026-01-01', atualizado_em: '2026-01-01' }] });
+  try {
+    const resposta = await requisitar({ method: 'POST', url: '/api/usuarios/login',
+      payload: { email: 'ana@exemplo.com', senha: 'senha123' },
+    });
+    assert.equal(resposta.statusCode, 200);
+    assert.equal(resposta.json().id, 7);
+    assert.equal(resposta.json().token, undefined);
+  } finally {
+    db.query = consultaOriginal;
+  }
+});
+
 test('gestor fecha a vigência anterior ao alterar preço', async () => {
   const chamadas = [];
-  const conectarOriginal = pool.connect;
-  pool.connect = async () => ({
+  const conectarOriginal = db.pool.connect;
+  db.pool.connect = async () => ({
     query: async (sql, valores = []) => {
       chamadas.push({ sql, valores });
       if (sql.includes('SELECT * FROM produto')) return { rows: [{ id: 1, nome: 'Teste', sku: 'T1', ativo: true,
@@ -112,6 +173,6 @@ test('gestor fecha a vigência anterior ao alterar preço', async () => {
     assert.equal(registro.valores[3], 'Reajuste');
     assert.ok(chamadas.some(({ sql }) => sql === 'COMMIT'));
   } finally {
-    pool.connect = conectarOriginal;
+    db.pool.connect = conectarOriginal;
   }
 });

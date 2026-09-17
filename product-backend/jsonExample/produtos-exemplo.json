@@ -1,0 +1,45 @@
+[
+  {
+    "sku": "CEL-0001",
+    "nome": "Smartphone Galaxy X",
+    "descricao": "Tela 6.5 polegadas, 128GB",
+    "categoria_id": 5,
+    "unidade_medida_id": 1,
+    "preco": 1999.90,
+    "estoque": 15
+  },
+  {
+    "sku": "ACE-0001",
+    "nome": "Capinha de Silicone",
+    "categoria_id": 6,
+    "unidade_medida_id": 1,
+    "preco": 29.90,
+    "estoque": 200
+  },
+  {
+    "sku": "ALI-0001",
+    "nome": "Arroz Tipo 1",
+    "descricao": "Pacote a granel, vendido por quilo",
+    "categoria_id": 3,
+    "unidade_medida_id": 2,
+    "preco": 24.50,
+    "estoque": 300
+  },
+  {
+    "sku": "BEB-0001",
+    "nome": "Refrigerante Cola 2L",
+    "categoria_id": 7,
+    "unidade_medida_id": 3,
+    "preco": 8.99,
+    "estoque": 500.5
+  },
+  {
+    "sku": "LIM-0001",
+    "nome": "Detergente Neutro",
+    "categoria_id": 4,
+    "unidade_medida_id": 1,
+    "preco": 3.49,
+    "estoque": 1000,
+    "usuario_id": null
+  }
+]

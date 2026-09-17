@@ -13,7 +13,7 @@ services:
       timeout: 3s
       retries: 10
     ports:
-      - "127.0.0.1:${POSTGRES_PORT:-5433}:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-5434}:5432"
 
   backend:
     build: .
@@ -31,7 +31,7 @@ services:
       banco:
         condition: service_healthy
     ports:
-      - "${PORT:-3000}:3000"
+      - "${PORT:-3001}:3000"
 
 volumes:
   dados_postgres_uml:

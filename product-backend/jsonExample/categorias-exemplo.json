@@ -1,0 +1,19 @@
+[
+  {
+    "nome": "Eletronicos"
+  },
+  {
+    "nome": "Alimentos"
+  },
+  {
+    "nome": "Limpeza"
+  },
+  {
+    "nome": "Celulares",
+    "categoria_pai_id": 1
+  },
+  {
+    "nome": "Bebidas",
+    "categoria_pai_id": 2
+  }
+]

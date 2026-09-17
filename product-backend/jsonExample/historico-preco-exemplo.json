@@ -1,0 +1,19 @@
+{
+  "observacao": "Nao existe uma rota para criar historico de preco diretamente. Um novo registro e gerado automaticamente quando voce faz PUT /api/produtos/:id enviando um preco diferente do preco atual. 'motivo' e 'usuario_id' sao opcionais e pertencem so ao historico, nao a tabela produto.",
+
+  "corpo_do_PUT_que_gera_historico": {
+    "preco": 1799.90,
+    "motivo": "Promocao Black Friday",
+    "usuario_id": null
+  },
+
+  "formato_do_registro_retornado_em_GET_historico-precos": {
+    "id": 9,
+    "produto_id": 1,
+    "preco": 1799.90,
+    "vigencia_inicio": "2026-09-17T04:16:13.547Z",
+    "vigencia_fim": null,
+    "motivo": "Promocao Black Friday",
+    "usuario_id": null
+  }
+}

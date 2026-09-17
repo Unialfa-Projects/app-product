@@ -13,12 +13,3 @@ export function idDaRota(request) {
   if (!resultado.success) throw new ApiError(400, 'ID_INVALIDO', 'Identificador inválido');
   return resultado.data;
 }
-
-export function aplicarEstado(produto) {
-  return {
-    ...produto,
-    preco: Number(produto.preco),
-    estoque: Number(produto.estoque),
-    situacao: produto.ativo ? 'ativo' : 'inativo',
-  };
-}
