@@ -4,50 +4,112 @@
       <nav class="breadcrumb" aria-label="Navegação estrutural">
         <span>Início</span>
         <span class="breadcrumb-separator">/</span>
-        <strong>Login</strong>
+        <strong>{{ telaAtual === 'login' ? 'Login' : 'Cadastro' }}</strong>
       </nav>
     </header>
 
     <main class="pagina">
-      <section class="login-card" aria-labelledby="login-title">
-        <p class="eyebrow">BEM-VINDO DE VOLTA</p>
-        <h1 id="login-title">Acesse sua conta</h1>
-        <p class="intro">Entre com seus dados para continuar.</p>
+      <section class="login-card" :aria-labelledby="telaAtual === 'login' ? 'login-title' : 'cadastro-title'">
+        <template v-if="telaAtual === 'login'">
+          <p class="eyebrow">BEM-VINDO DE VOLTA</p>
+          <h1 id="login-title">Acesse sua conta</h1>
+          <p class="intro">Entre com seus dados para continuar.</p>
 
-        <form @submit.prevent="entrar">
-          <label for="usuario">Usuário</label>
-          <div class="input-wrap">
-            <svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="12" cy="8" r="3.5" />
-              <path d="M5.5 20c.5-3.1 2.7-5 6.5-5s6 1.9 6.5 5" />
-            </svg>
-            <input id="usuario" type="text" placeholder="Digite seu usuário" autocomplete="username">
-          </div>
+          <form @submit.prevent="entrar">
+            <label for="usuario">Usuário</label>
+            <div class="input-wrap">
+              <svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="8" r="3.5" />
+                <path d="M5.5 20c.5-3.1 2.7-5 6.5-5s6 1.9 6.5 5" />
+              </svg>
+              <input id="usuario" type="text" placeholder="Digite seu usuário" autocomplete="username">
+            </div>
 
-          <label for="senha">Senha</label>
-          <div class="input-wrap">
-            <svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true">
-              <rect x="5.5" y="10" width="13" height="10" rx="1.5" />
-              <path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10" />
-            </svg>
-            <input id="senha" type="password" placeholder="Digite sua senha" autocomplete="current-password">
-          </div>
+            <label for="senha">Senha</label>
+            <div class="input-wrap">
+              <svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="5.5" y="10" width="13" height="10" rx="1.5" />
+                <path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10" />
+              </svg>
+              <input id="senha" type="password" placeholder="Digite sua senha" autocomplete="current-password">
+            </div>
 
-          <div class="form-options">
-            <label class="remember-option">
-              <input type="checkbox">
-              <span>Lembrar de mim</span>
-            </label>
-            <a href="#" @click.prevent>Esqueci minha senha</a>
-          </div>
+            <div class="form-options">
+              <label class="remember-option">
+                <input type="checkbox">
+                <span>Lembrar de mim</span>
+              </label>
+              <a href="#" @click.prevent>Esqueci minha senha</a>
+            </div>
 
-          <button type="submit">
-            <span>Entrar</span>
-            <span class="button-arrow" aria-hidden="true">&#8594;</span>
-          </button>
-        </form>
+            <button type="submit">
+              <span>Entrar</span>
+              <span class="button-arrow" aria-hidden="true">&#8594;</span>
+            </button>
+          </form>
 
-        <p class="support">Precisa de ajuda? <a href="#" @click.prevent>Fale com o suporte</a></p>
+          <p class="support">Ainda não tem uma conta? <a href="#" @click.prevent="abrirCadastro">Cadastre-se</a></p>
+        </template>
+
+        <template v-else>
+          <p class="eyebrow">CRIE SUA CONTA</p>
+          <h1 id="cadastro-title">Faça seu cadastro</h1>
+          <p class="intro">Preencha seus dados para começar.</p>
+
+          <form @submit.prevent="cadastrar">
+            <label for="nome">Nome completo</label>
+            <div class="input-wrap">
+              <svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="8" r="3.5" />
+                <path d="M5.5 20c.5-3.1 2.7-5 6.5-5s6 1.9 6.5 5" />
+              </svg>
+              <input id="nome" type="text" placeholder="Digite seu nome" autocomplete="name" required>
+            </div>
+
+            <label for="email">E-mail</label>
+            <div class="input-wrap">
+              <svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="4" y="6" width="16" height="12" rx="1.5" />
+                <path d="m5 7 7 5 7-5" />
+              </svg>
+              <input id="email" type="email" placeholder="Digite seu e-mail" autocomplete="email" required>
+            </div>
+
+            <label for="novo-usuario">Usuário</label>
+            <div class="input-wrap">
+              <svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="8" r="3.5" />
+                <path d="M5.5 20c.5-3.1 2.7-5 6.5-5s6 1.9 6.5 5" />
+              </svg>
+              <input id="novo-usuario" type="text" placeholder="Escolha um usuário" autocomplete="username" required>
+            </div>
+
+            <label for="nova-senha">Senha</label>
+            <div class="input-wrap">
+              <svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="5.5" y="10" width="13" height="10" rx="1.5" />
+                <path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10" />
+              </svg>
+              <input id="nova-senha" type="password" placeholder="Crie uma senha" autocomplete="new-password" required>
+            </div>
+
+            <label for="confirmar-senha">Confirmar senha</label>
+            <div class="input-wrap">
+              <svg class="field-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="5.5" y="10" width="13" height="10" rx="1.5" />
+                <path d="M8.5 10V7.5a3.5 3.5 0 0 1 7 0V10" />
+              </svg>
+              <input id="confirmar-senha" type="password" placeholder="Repita sua senha" autocomplete="new-password" required>
+            </div>
+
+            <button type="submit">
+              <span>Criar conta</span>
+              <span class="button-arrow" aria-hidden="true">&#8594;</span>
+            </button>
+          </form>
+
+          <p class="support">Já tem uma conta? <a href="#" @click.prevent="abrirLogin">Entrar</a></p>
+        </template>
       </section>
     </main>
   </div>
@@ -55,9 +117,23 @@
 
 <script>
 export default {
+  data() {
+    return {
+      telaAtual: 'login'
+    }
+  },
   methods: {
     entrar() {
       alert('Login realizado!')
+    },
+    cadastrar() {
+      alert('Cadastro realizado!')
+    },
+    abrirCadastro() {
+      this.telaAtual = 'cadastro'
+    },
+    abrirLogin() {
+      this.telaAtual = 'login'
     }
   }
 }
