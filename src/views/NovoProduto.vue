@@ -384,6 +384,7 @@ function salvarProduto() {
 </script>
 
 <style scoped>
+
 * {
   box-sizing: border-box;
 }
@@ -395,67 +396,115 @@ function salvarProduto() {
   color: #1e293b;
 }
 
-/* SIDEBAR */
+/* =========================================
+   SIDEBAR
+========================================= */
 
 .sidebar {
   width: 240px;
+  min-width: 240px;
   min-height: 100vh;
-  background: #ffffff;
-  border-right: 1px solid #e2e8f0;
+
+  background: #101b36;
+  color: #ffffff;
+
   padding: 24px 16px;
+
+  flex-shrink: 0;
 }
 
 .logo {
   display: flex;
   align-items: center;
+
   gap: 10px;
+
   font-size: 22px;
   font-weight: 700;
+
   margin-bottom: 42px;
   padding-left: 8px;
-  color: #1e293b;
+
+  color: #ffffff;
 }
 
 .logo-icon {
   width: 34px;
   height: 34px;
+
   border-radius: 8px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   background: #2563eb;
   color: #ffffff;
+
   font-size: 18px;
 }
+
+/* MENU */
 
 nav {
   display: flex;
   flex-direction: column;
+
   gap: 6px;
 }
 
 .menu-item {
   display: flex;
   align-items: center;
+
   gap: 12px;
+
   padding: 12px 14px;
+
   border-radius: 8px;
-  color: #64748b;
+
+  color: #cbd5e1;
+
   text-decoration: none;
+
   font-size: 14px;
+
+  cursor: pointer;
+
+  transition: 0.2s;
 }
 
 .menu-item:hover {
-  background: #eff6ff;
-  color: #2563eb;
+  background: #182746;
+  color: #ffffff;
 }
 
-/* CONTEÚDO */
+/* ITEM ATIVO */
+
+.menu-item.router-link-active,
+.menu-item.router-link-exact-active {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.menu-item.router-link-active:hover,
+.menu-item.router-link-exact-active:hover {
+  background: #1d4ed8;
+  color: #ffffff;
+}
+
+/* =========================================
+   CONTEÚDO
+========================================= */
 
 .conteudo {
   flex: 1;
+
   padding: 38px 46px;
+
   min-width: 0;
+
+  overflow-x: hidden;
 }
 
 .topo {
@@ -465,58 +514,86 @@ nav {
 .breadcrumb {
   display: flex;
   align-items: center;
+
   gap: 9px;
+
   color: #94a3b8;
+
   font-size: 13px;
+
   margin-bottom: 12px;
+
+  flex-wrap: wrap;
 }
 
 .breadcrumb a {
   color: #2563eb;
+
   text-decoration: none;
 }
 
 h1 {
   margin: 0 0 6px;
+
   font-size: 30px;
+
   font-weight: 700;
+
   color: #0f172a;
 }
 
 .topo p {
   margin: 0;
+
   color: #64748b;
+
   font-size: 14px;
 }
 
-/* CARD */
+/* =========================================
+   CARD
+========================================= */
 
 .card {
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
+  width: 100%;
   max-width: 1100px;
+
+  background: #ffffff;
+
+  border: 1px solid #e2e8f0;
+
+  border-radius: 12px;
+
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+
+  overflow: hidden;
 }
 
 .card-header {
   padding: 24px 28px;
+
   border-bottom: 1px solid #e2e8f0;
 }
 
 .card-header h2 {
   margin: 0 0 6px;
+
   font-size: 18px;
+
   color: #0f172a;
 }
 
 .card-header p {
   margin: 0;
+
   color: #64748b;
+
   font-size: 13px;
 }
 
-/* FORMULÁRIO */
+/* =========================================
+   FORMULÁRIO
+========================================= */
 
 form {
   padding: 28px;
@@ -524,14 +601,20 @@ form {
 
 .form-grid {
   display: grid;
+
   grid-template-columns: repeat(2, minmax(0, 1fr));
+
   gap: 22px 24px;
 }
 
 .campo {
   display: flex;
+
   flex-direction: column;
+
   gap: 7px;
+
+  min-width: 0;
 }
 
 .campo-grande {
@@ -540,7 +623,9 @@ form {
 
 label {
   font-size: 13px;
+
   font-weight: 600;
+
   color: #334155;
 }
 
@@ -551,13 +636,21 @@ label span {
 input,
 select {
   width: 100%;
+
   height: 44px;
+
   border: 1px solid #cbd5e1;
+
   border-radius: 7px;
+
   padding: 0 13px;
+
   background: #ffffff;
+
   color: #1e293b;
+
   font-size: 14px;
+
   outline: none;
 }
 
@@ -568,85 +661,128 @@ input::placeholder {
 input:focus,
 select:focus {
   border-color: #2563eb;
+
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
 }
 
 .input-prefix {
   display: flex;
   align-items: center;
+
   height: 44px;
+
   border: 1px solid #cbd5e1;
+
   border-radius: 7px;
+
   overflow: hidden;
+
   background: #ffffff;
 }
 
 .input-prefix:focus-within {
   border-color: #2563eb;
+
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
 }
 
 .input-prefix span {
   height: 100%;
+
   display: flex;
   align-items: center;
+
   padding: 0 12px;
+
   background: #f1f5f9;
+
   color: #64748b;
+
   font-size: 13px;
+
   border-right: 1px solid #e2e8f0;
 }
 
 .input-prefix input {
   border: 0;
+
   box-shadow: none;
+
   height: 100%;
 }
 
-/* ERROS */
+/* =========================================
+   ERROS
+========================================= */
 
 .erro {
   color: #dc2626;
+
   font-size: 12px;
 }
 
 .alerta {
   margin-top: 24px;
+
   padding: 13px 15px;
+
   border-radius: 7px;
+
   background: #fef2f2;
+
   border: 1px solid #fecaca;
+
   color: #b91c1c;
+
   font-size: 13px;
 }
 
-/* BOTÕES */
+/* =========================================
+   BOTÕES
+========================================= */
 
 .acoes {
   display: flex;
+
   justify-content: flex-end;
+
   gap: 12px;
+
   margin-top: 34px;
+
   padding-top: 22px;
+
   border-top: 1px solid #e2e8f0;
 }
 
 .btn {
   min-height: 42px;
+
   padding: 0 20px;
+
   border-radius: 7px;
+
   display: inline-flex;
+
   align-items: center;
   justify-content: center;
+
   font-size: 14px;
+
   font-weight: 600;
+
   cursor: pointer;
+
   text-decoration: none;
+
+  transition: 0.2s;
 }
 
 .btn-secundario {
   background: #ffffff;
+
   color: #475569;
+
   border: 1px solid #cbd5e1;
 }
 
@@ -656,7 +792,9 @@ select:focus {
 
 .btn-principal {
   background: #2563eb;
+
   color: #ffffff;
+
   border: 1px solid #2563eb;
 }
 
@@ -666,53 +804,46 @@ select:focus {
 
 .btn-principal:disabled {
   opacity: 0.6;
+
   cursor: not-allowed;
 }
 
-/* RESPONSIVO */
+/* =========================================
+   NOTEBOOK
+========================================= */
 
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
+
   .sidebar {
-    width: 190px;
+    width: 220px;
+    min-width: 220px;
   }
 
   .conteudo {
-    padding: 28px 24px;
+    padding: 32px 28px;
   }
+
 }
 
-@media (max-width: 700px) {
-  .pagina {
-    display: block;
-  }
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 900px) {
 
   .sidebar {
-    width: 100%;
-    min-height: auto;
-    border-right: 0;
-    border-bottom: 1px solid #e2e8f0;
-    padding: 14px;
+    width: 190px;
+    min-width: 190px;
+
+    padding: 22px 12px;
   }
 
   .logo {
-    margin-bottom: 12px;
-  }
-
-  nav {
-    flex-direction: row;
-    overflow-x: auto;
-  }
-
-  .menu-item {
-    white-space: nowrap;
+    padding-left: 6px;
   }
 
   .conteudo {
-    padding: 22px 16px;
-  }
-
-  h1 {
-    font-size: 25px;
+    padding: 28px 22px;
   }
 
   .form-grid {
@@ -721,6 +852,92 @@ select:focus {
 
   .campo-grande {
     grid-column: span 1;
+  }
+
+}
+
+/* =========================================
+   CELULAR
+========================================= */
+
+@media (max-width: 700px) {
+
+  .pagina {
+    display: block;
+
+    min-height: 100vh;
+  }
+
+  /* Sidebar continua azul-escuro */
+  .sidebar {
+    width: 100%;
+    min-width: 100%;
+    min-height: auto;
+
+    background: #101b36;
+
+    padding: 14px 16px;
+
+    border-right: 0;
+    border-bottom: 1px solid #1d2a4a;
+  }
+
+  .logo {
+    margin-bottom: 12px;
+
+    padding-left: 0;
+
+    font-size: 21px;
+  }
+
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  nav {
+    flex-direction: row;
+
+    overflow-x: auto;
+
+    gap: 6px;
+
+    scrollbar-width: none;
+  }
+
+  nav::-webkit-scrollbar {
+    display: none;
+  }
+
+  .menu-item {
+    flex: 0 0 auto;
+
+    white-space: nowrap;
+
+    padding: 10px 12px;
+
+    color: #cbd5e1;
+  }
+
+  .menu-item.router-link-active,
+  .menu-item.router-link-exact-active {
+    background: #2563eb;
+
+    color: #ffffff;
+  }
+
+  .conteudo {
+    width: 100%;
+
+    padding: 22px 16px;
+  }
+
+  h1 {
+    font-size: 25px;
+  }
+
+  .topo p {
+    line-height: 1.5;
   }
 
   .card-header,
@@ -735,5 +952,51 @@ select:focus {
   .btn {
     width: 100%;
   }
+
+}
+
+/* =========================================
+   CELULAR PEQUENO
+========================================= */
+
+@media (max-width: 430px) {
+
+  .sidebar {
+    padding: 12px;
+  }
+
+  .logo {
+    font-size: 20px;
+  }
+
+  .menu-item {
+    font-size: 13px;
+
+    padding: 9px 11px;
+  }
+
+  .conteudo {
+    padding: 18px 12px;
+  }
+
+  .breadcrumb {
+    font-size: 12px;
+
+    gap: 6px;
+  }
+
+  h1 {
+    font-size: 23px;
+  }
+
+  .card-header,
+  form {
+    padding: 16px;
+  }
+
+  .form-grid {
+    gap: 17px;
+  }
+
 }
 </style>
