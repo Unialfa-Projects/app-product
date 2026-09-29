@@ -2,24 +2,29 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
+import {
+  obterProdutoSelecionado,
+  obterHistoricoPrecos,
+  inativarProduto,
+  reativarProduto,
+  formatarPreco
+} from '../data/produtos'
+
 const router = useRouter()
 
-const produto = ref({
-  nome: 'Arroz Branco 5kg',
-  sku: 'PRD001',
-  ean: '7891234567890',
-  categoria: 'Alimentos',
-  unidade: 'UN',
-  precoCusto: '22,00',
-  precoVenda: '29,90'
-})
+const produto = ref({})
+const historico = ref([])
+const mostrarHistorico = ref(false)
 
-onMounted(() => {
-  const produtoSalvo = localStorage.getItem('produtoPRD001')
+onMounted(async () => {
+  const produtoSalvo = await obterProdutoSelecionado()
 
-  if (produtoSalvo) {
-    produto.value = JSON.parse(produtoSalvo)
+  if (!produtoSalvo) {
+    router.push('/')
+    return
   }
+
+  produto.value = produtoSalvo
 })
 
 function voltarProdutos() {
@@ -28,6 +33,43 @@ function voltarProdutos() {
 
 function editarProduto() {
   router.push('/editar-produto')
+}
+
+async function alternarHistorico() {
+  mostrarHistorico.value = !mostrarHistorico.value
+
+  if (!mostrarHistorico.value) return
+
+  try {
+    historico.value = await obterHistoricoPrecos(produto.value.id)
+  } catch (erro) {
+    mostrarHistorico.value = false
+    alert(erro.message)
+  }
+}
+
+async function alternarStatus() {
+  const acao = produto.value.ativo
+    ? 'inativar'
+    : 'ativar'
+
+  const confirmado = confirm(
+    `Deseja realmente ${acao} o produto "${produto.value.nome}"?`
+  )
+
+  if (!confirmado) return
+
+  try {
+    produto.value = produto.value.ativo
+      ? await inativarProduto(produto.value.id)
+      : await reativarProduto(produto.value.id)
+  } catch (erro) {
+    alert(erro.message)
+  }
+}
+
+function formatarData(valor) {
+  return valor ? new Date(valor).toLocaleString('pt-BR') : '—'
 }
 </script>
 
@@ -52,23 +94,21 @@ function editarProduto() {
           Produtos
         </a>
 
-        <a
+        <router-link
           class="menu-item"
-          href="#"
-          @click.prevent
+          to="/categorias"
         >
           <span>▤</span>
           Categorias
-        </a>
+        </router-link>
 
-        <a
+        <router-link
           class="menu-item"
-          href="#"
-          @click.prevent
+          to="/unidades-medida"
         >
           <span>◫</span>
           Unidades de medida
-        </a>
+        </router-link>
 
       </nav>
 
@@ -121,8 +161,11 @@ function editarProduto() {
 
         <div class="header-actions">
 
-          <span class="status active-status">
-            Ativo
+          <span
+            class="status"
+            :class="produto.ativo ? 'active-status' : 'inactive-status'"
+          >
+            {{ produto.ativo ? 'Ativo' : 'Inativo' }}
           </span>
 
           <button
@@ -196,35 +239,11 @@ function editarProduto() {
           <div class="info-item">
 
             <span>
-              EAN-13
-            </span>
-
-            <strong>
-              {{ produto.ean }}
-            </strong>
-
-          </div>
-
-          <div class="info-item">
-
-            <span>
-              Preço de custo
-            </span>
-
-            <strong>
-              R$ {{ produto.precoCusto }}
-            </strong>
-
-          </div>
-
-          <div class="info-item">
-
-            <span>
               Preço de venda
             </span>
 
             <strong>
-              R$ {{ produto.precoVenda }}
+              R$ {{ formatarPreco(produto.preco) }}
             </strong>
 
           </div>
@@ -247,7 +266,7 @@ function editarProduto() {
           </span>
 
           <strong>
-            120 unidades
+            {{ produto.estoque ?? 0 }} {{ produto.unidade }}
           </strong>
 
         </div>
@@ -270,15 +289,47 @@ function editarProduto() {
             Editar produto
           </button>
 
-          <button class="secondary-button">
+          <button
+            class="secondary-button"
+            @click="alternarHistorico"
+          >
             Histórico de preço
           </button>
 
-          <button class="danger-button">
-            Inativar produto
+          <button
+            :class="produto.ativo ? 'danger-button' : 'secondary-button'"
+            @click="alternarStatus"
+          >
+            {{ produto.ativo ? 'Inativar produto' : 'Reativar produto' }}
           </button>
 
         </div>
+
+        <table
+          v-if="mostrarHistorico"
+          class="history-table"
+        >
+          <thead>
+            <tr>
+              <th>Preço</th>
+              <th>Início da vigência</th>
+              <th>Fim da vigência</th>
+              <th>Motivo</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr
+              v-for="registro in historico"
+              :key="registro.id"
+            >
+              <td>R$ {{ formatarPreco(registro.preco) }}</td>
+              <td>{{ formatarData(registro.vigencia_inicio) }}</td>
+              <td>{{ formatarData(registro.vigencia_fim) }}</td>
+              <td>{{ registro.motivo || '—' }}</td>
+            </tr>
+          </tbody>
+        </table>
 
       </section>
 
@@ -522,6 +573,12 @@ nav {
   color: #16803c;
 }
 
+.inactive-status {
+  background: #f1f5f9;
+
+  color: #64748b;
+}
+
 /* =========================================
    CARD
 ========================================= */
@@ -706,6 +763,31 @@ nav {
   gap: 12px;
 
   flex-wrap: wrap;
+}
+
+.history-table {
+  width: 100%;
+
+  margin-top: 22px;
+
+  border-collapse: collapse;
+
+  font-size: 13px;
+}
+
+.history-table th,
+.history-table td {
+  padding: 10px 12px;
+
+  text-align: left;
+
+  border-bottom: 1px solid #e2e6ee;
+}
+
+.history-table th {
+  color: #697386;
+
+  font-weight: 600;
 }
 
 /* =========================================

@@ -3,25 +3,30 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 import {
-  obterProdutos,
-  salvarProdutos,
-  obterProdutoSelecionado
+  atualizarProduto,
+  obterCategorias,
+  obterUnidades,
+  obterProdutoSelecionado,
+  numeroPreco,
+  formatarPreco
 } from '../data/produtos'
+import { obterUsuarioLogado } from '../data/usuarios'
 
 const router = useRouter()
 
 const nome = ref('')
 const sku = ref('')
-const ean = ref('')
 const categoria = ref('')
 const unidade = ref('')
-const precoCusto = ref('')
 const precoVenda = ref('')
+
+const categorias = ref([])
+const unidades = ref([])
 
 const produtoOriginal = ref(null)
 
-onMounted(() => {
-  const produto = obterProdutoSelecionado()
+onMounted(async () => {
+  const produto = await obterProdutoSelecionado()
 
   if (!produto) {
     router.push('/')
@@ -32,11 +37,23 @@ onMounted(() => {
 
   nome.value = produto.nome || ''
   sku.value = produto.sku || ''
-  ean.value = produto.ean || ''
-  categoria.value = produto.categoria || ''
-  unidade.value = produto.unidade || ''
-  precoCusto.value = produto.precoCusto || ''
-  precoVenda.value = produto.precoVenda || ''
+  categoria.value = produto.categoria_id || ''
+  unidade.value = produto.unidade_medida_id || ''
+  precoVenda.value = formatarPreco(produto.preco)
+
+  try {
+    const [listaCategorias, listaUnidades] = await Promise.all([
+      obterCategorias(),
+      obterUnidades()
+    ])
+
+    categorias.value = listaCategorias.filter(
+      item => item.ativo || item.id === produto.categoria_id
+    )
+    unidades.value = listaUnidades
+  } catch (erro) {
+    alert(erro.message)
+  }
 })
 
 function voltarProdutos() {
@@ -47,37 +64,30 @@ function visualizarProduto() {
   router.push('/visualizar-produto')
 }
 
-function salvarProduto() {
+async function salvarProduto() {
   if (!produtoOriginal.value) {
     return
   }
 
-  const produtos = obterProdutos()
+  const dados = {
+    nome: nome.value.trim(),
+    categoria_id: categoria.value,
+    unidade_medida_id: unidade.value
+  }
 
-  const indice = produtos.findIndex(
-    produto => produto.sku === produtoOriginal.value.sku
-  )
+  const preco = numeroPreco(precoVenda.value)
 
-  if (indice === -1) {
-    alert('Produto não encontrado.')
+  if (preco !== produtoOriginal.value.preco) {
+    dados.preco = preco
+    dados.usuario_id = obterUsuarioLogado()?.id ?? null
+  }
+
+  try {
+    await atualizarProduto(produtoOriginal.value.id, dados)
+  } catch (erro) {
+    alert(erro.message)
     return
   }
-
-  const produtoAtualizado = {
-    ...produtos[indice],
-
-    nome: nome.value,
-    sku: sku.value,
-    ean: ean.value,
-    categoria: categoria.value,
-    unidade: unidade.value,
-    precoCusto: precoCusto.value,
-    precoVenda: precoVenda.value
-  }
-
-  produtos[indice] = produtoAtualizado
-
-  salvarProdutos(produtos)
 
   alert('Produto atualizado com sucesso!')
 
@@ -104,13 +114,19 @@ function salvarProduto() {
           Produtos
         </a>
 
-        <a class="menu-item">
+        <router-link
+          class="menu-item"
+          to="/categorias"
+        >
           Categorias
-        </a>
+        </router-link>
 
-        <a class="menu-item">
+        <router-link
+          class="menu-item"
+          to="/unidades-medida"
+        >
           Unidades de medida
-        </a>
+        </router-link>
 
       </nav>
 
@@ -164,8 +180,11 @@ function salvarProduto() {
           </p>
         </div>
 
-        <span class="status active-status">
-          Ativo
+        <span
+          class="status"
+          :class="produtoOriginal?.ativo === false ? 'inactive-status' : 'active-status'"
+        >
+          {{ produtoOriginal?.ativo === false ? 'Inativo' : 'Ativo' }}
         </span>
 
       </section>
@@ -185,6 +204,7 @@ function salvarProduto() {
             <input
               v-model="nome"
               type="text"
+              maxlength="60"
             />
 
           </div>
@@ -202,18 +222,6 @@ function salvarProduto() {
 
           </div>
 
-          <!-- EAN -->
-          <div class="field">
-
-            <label>EAN-13</label>
-
-            <input
-              v-model="ean"
-              type="text"
-            />
-
-          </div>
-
           <!-- CATEGORIA -->
           <div class="field">
 
@@ -221,9 +229,13 @@ function salvarProduto() {
 
             <select v-model="categoria">
 
-              <option>Alimentos</option>
-              <option>Bebidas</option>
-              <option>Outros</option>
+              <option
+                v-for="item in categorias"
+                :key="item.id"
+                :value="item.id"
+              >
+                {{ item.nome }}
+              </option>
 
             </select>
 
@@ -236,23 +248,15 @@ function salvarProduto() {
 
             <select v-model="unidade">
 
-              <option>UN</option>
-              <option>KG</option>
-              <option>L</option>
+              <option
+                v-for="item in unidades"
+                :key="item.id"
+                :value="item.id"
+              >
+                {{ item.sigla }} - {{ item.nome }}
+              </option>
 
             </select>
-
-          </div>
-
-          <!-- PREÇO DE CUSTO -->
-          <div class="field">
-
-            <label>Preço de custo</label>
-
-            <input
-              v-model="precoCusto"
-              type="text"
-            />
 
           </div>
 
@@ -284,7 +288,7 @@ function salvarProduto() {
           </span>
 
           <strong>
-            120 unidades
+            {{ produtoOriginal?.estoque ?? 0 }} {{ produtoOriginal?.unidade }}
           </strong>
 
         </div>
@@ -479,6 +483,11 @@ function salvarProduto() {
 .active-status {
   background: #dff5e7;
   color: #16803c;
+}
+
+.inactive-status {
+  background: #f1f5f9;
+  color: #64748b;
 }
 
 /* =========================================

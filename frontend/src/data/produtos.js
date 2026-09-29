@@ -1,119 +1,110 @@
-const PRODUTOS_KEY = 'sige_produtos'
+import { api } from '../services/api'
 
-const produtosIniciais = [
-  {
-    id: 1,
-    sku: 'PRD001',
-    nome: 'Arroz Branco 5kg',
-    ean: '7891234567890',
-    categoria: 'Alimentos',
-    unidade: 'UN',
-    precoCusto: '22,00',
-    precoVenda: '29,90',
-    quantidade: 120,
-    ativo: true,
-    historicoPrecos: []
-  },
+// Produtos, categorias e unidades agora vêm do banco de dados pela API.
+// Apenas o produto selecionado (para visualizar/editar) continua no
+// localStorage, como antes.
+const PRODUTO_SELECIONADO_KEY = 'sige_produto_selecionado'
 
-  {
-    id: 2,
-    sku: 'PRD002',
-    nome: 'Feijão Carioca 1kg',
-    ean: '7891234567891',
-    categoria: 'Alimentos',
-    unidade: 'UN',
-    precoCusto: '6,00',
-    precoVenda: '8,50',
-    quantidade: 85,
-    ativo: true,
-    historicoPrecos: []
-  },
+// A API pagina em no máximo 100 itens; busca todas as páginas.
+export async function obterProdutos() {
+  const produtos = []
+  let pagina = 1
+  let total = 0
 
-  {
-    id: 3,
-    sku: 'PRD003',
-    nome: 'Refrigerante 2L',
-    ean: '7891234567892',
-    categoria: 'Bebidas',
-    unidade: 'UN',
-    precoCusto: '7,00',
-    precoVenda: '9,99',
-    quantidade: 42,
-    ativo: false,
-    historicoPrecos: []
-  }
-]
+  do {
+    const resposta = await api.get(`/api/produtos?pagina=${pagina}&limite=100`)
 
-export function obterProdutos() {
-  const dados = localStorage.getItem(PRODUTOS_KEY)
+    produtos.push(...resposta.dados)
+    total = resposta.total
+    pagina++
+  } while (produtos.length < total)
 
-  if (!dados) {
-    localStorage.setItem(
-      PRODUTOS_KEY,
-      JSON.stringify(produtosIniciais)
-    )
-
-    return [...produtosIniciais]
-  }
-
-  try {
-    return JSON.parse(dados)
-  } catch {
-    localStorage.setItem(
-      PRODUTOS_KEY,
-      JSON.stringify(produtosIniciais)
-    )
-
-    return [...produtosIniciais]
-  }
+  return produtos
 }
 
-export function salvarProdutos(produtos) {
+export function obterProdutoPorId(id) {
+  return api.get(`/api/produtos/${id}`)
+}
+
+export function criarProduto(dados) {
+  return api.post('/api/produtos', dados)
+}
+
+export function atualizarProduto(id, dados) {
+  return api.put(`/api/produtos/${id}`, dados)
+}
+
+export function inativarProduto(id) {
+  return api.delete(`/api/produtos/${id}`)
+}
+
+export function reativarProduto(id) {
+  return api.post(`/api/produtos/${id}/reativar`)
+}
+
+export async function obterHistoricoPrecos(id) {
+  const resposta = await api.get(`/api/produtos/${id}/historico-precos`)
+
+  return resposta.dados
+}
+
+export async function obterCategorias() {
+  const resposta = await api.get('/api/categorias')
+
+  return resposta.dados
+}
+
+export function criarCategoria(dados) {
+  return api.post('/api/categorias', dados)
+}
+
+export function inativarCategoria(id) {
+  return api.delete(`/api/categorias/${id}`)
+}
+
+export async function obterUnidades() {
+  const resposta = await api.get('/api/unidades-medida')
+
+  return resposta.dados
+}
+
+export function criarUnidade(dados) {
+  return api.post('/api/unidades-medida', dados)
+}
+
+export function selecionarProduto(id) {
   localStorage.setItem(
-    PRODUTOS_KEY,
-    JSON.stringify(produtos)
-  )
-}
-
-export function obterProdutoPorSku(sku) {
-  const produtos = obterProdutos()
-
-  return produtos.find(
-    produto => produto.sku === sku
-  )
-}
-
-export function selecionarProduto(sku) {
-  localStorage.setItem(
-    'sige_produto_selecionado',
-    sku
+    PRODUTO_SELECIONADO_KEY,
+    String(id)
   )
 }
 
 export function obterProdutoSelecionado() {
-  const sku = localStorage.getItem(
-    'sige_produto_selecionado'
+  const id = localStorage.getItem(
+    PRODUTO_SELECIONADO_KEY
   )
 
-  if (!sku) {
-    return null
+  if (!id) {
+    return Promise.resolve(null)
   }
 
-  return obterProdutoPorSku(sku)
+  return obterProdutoPorId(id).catch(() => null)
 }
 
-export function gerarNovoId(produtos) {
-  if (produtos.length === 0) {
-    return 1
-  }
+// "1.234,56" -> 1234.56 (mesma regra que já existia em NovoProduto.vue)
+export function numeroPreco(valor) {
+  if (!valor) return 0
 
-  return Math.max(
-    ...produtos.map(produto => produto.id)
-  ) + 1
+  const valorLimpo = String(valor)
+    .replace(/\./g, '')
+    .replace(',', '.')
+
+  return Math.round(Number(valorLimpo) * 100) / 100
 }
 
-export function gerarNovoSku(produtos) {
-  const numero = produtos.length + 1
-
-  return `PRD${String(numero).padStart(3, '0')}`
+export function formatarPreco(valor) {
+  return Number(valor ?? 0).toLocaleString('pt-BR', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
 }

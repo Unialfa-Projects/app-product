@@ -12,15 +12,15 @@
           Produtos
         </router-link>
 
-        <a href="#" class="menu-item">
+        <router-link to="/categorias" class="menu-item">
           <span>▤</span>
           Categorias
-        </a>
+        </router-link>
 
-        <a href="#" class="menu-item">
+        <router-link to="/unidades-medida" class="menu-item">
           <span>◫</span>
           Unidades de medida
-        </a>
+        </router-link>
       </nav>
     </aside>
 
@@ -56,6 +56,7 @@
                 id="nome"
                 v-model="form.nome"
                 type="text"
+                maxlength="60"
                 placeholder="Digite o nome do produto"
               />
 
@@ -73,6 +74,7 @@
                 id="sku"
                 v-model="form.sku"
                 type="text"
+                maxlength="15"
                 placeholder="Ex.: PRD004"
                 @input="form.sku = form.sku.toUpperCase()"
               />
@@ -83,36 +85,19 @@
             </div>
 
             <div class="campo">
-              <label for="ean">
-                EAN-13
-              </label>
-
-              <input
-                id="ean"
-                v-model="form.ean"
-                type="text"
-                maxlength="13"
-                placeholder="Digite o código EAN-13"
-                @input="form.ean = somenteNumeros(form.ean)"
-              />
-
-              <small v-if="erros.ean" class="erro">
-                {{ erros.ean }}
-              </small>
-            </div>
-
-            <div class="campo">
               <label for="categoria">
                 Categoria <span>*</span>
               </label>
 
               <select id="categoria" v-model="form.categoria">
                 <option value="">Selecione</option>
-                <option value="Alimentos">Alimentos</option>
-                <option value="Bebidas">Bebidas</option>
-                <option value="Limpeza">Limpeza</option>
-                <option value="Higiene">Higiene</option>
-                <option value="Outros">Outros</option>
+                <option
+                  v-for="categoria in categorias"
+                  :key="categoria.id"
+                  :value="categoria.id"
+                >
+                  {{ categoria.nome }}
+                </option>
               </select>
 
               <small v-if="erros.categoria" class="erro">
@@ -127,37 +112,17 @@
 
               <select id="unidade" v-model="form.unidade">
                 <option value="">Selecione</option>
-                <option value="UN">UN - Unidade</option>
-                <option value="KG">KG - Quilograma</option>
-                <option value="G">G - Grama</option>
-                <option value="L">L - Litro</option>
-                <option value="ML">ML - Mililitro</option>
+                <option
+                  v-for="unidade in unidades"
+                  :key="unidade.id"
+                  :value="unidade.id"
+                >
+                  {{ unidade.sigla }} - {{ unidade.nome }}
+                </option>
               </select>
 
               <small v-if="erros.unidade" class="erro">
                 {{ erros.unidade }}
-              </small>
-            </div>
-
-            <div class="campo">
-              <label for="precoCusto">
-                Preço de custo <span>*</span>
-              </label>
-
-              <div class="input-prefix">
-                <span>R$</span>
-
-                <input
-                  id="precoCusto"
-                  v-model="form.precoCusto"
-                  type="text"
-                  inputmode="decimal"
-                  placeholder="0,00"
-                />
-              </div>
-
-              <small v-if="erros.precoCusto" class="erro">
-                {{ erros.precoCusto }}
               </small>
             </div>
 
@@ -209,63 +174,62 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 import {
-  obterProdutos,
-  salvarProdutos,
+  criarProduto,
+  obterCategorias,
+  obterUnidades,
   selecionarProduto,
-  gerarNovoId
+  numeroPreco
 } from '../data/produtos'
+import { obterUsuarioLogado } from '../data/usuarios'
 
 const router = useRouter()
 
 const salvando = ref(false)
 const erroGeral = ref('')
 
+const categorias = ref([])
+const unidades = ref([])
+
 const form = ref({
   nome: '',
   sku: '',
-  ean: '',
   categoria: '',
   unidade: '',
-  precoCusto: '',
   precoVenda: ''
 })
 
 const erros = ref({
   nome: '',
   sku: '',
-  ean: '',
   categoria: '',
   unidade: '',
-  precoCusto: '',
   precoVenda: ''
 })
 
-function somenteNumeros(valor) {
-  return valor.replace(/\D/g, '')
-}
+onMounted(async () => {
+  try {
+    const [listaCategorias, listaUnidades] = await Promise.all([
+      obterCategorias(),
+      obterUnidades()
+    ])
 
-function numeroPreco(valor) {
-  if (!valor) return 0
-
-  const valorLimpo = String(valor)
-    .replace(/\./g, '')
-    .replace(',', '.')
-
-  return Number(valorLimpo)
-}
+    categorias.value = listaCategorias.filter(categoria => categoria.ativo)
+    unidades.value = listaUnidades
+  } catch (erro) {
+    erroGeral.value = erro.message
+  }
+})
 
 function limparErros() {
   erros.value = {
     nome: '',
     sku: '',
-    ean: '',
     categoria: '',
     unidade: '',
-    precoCusto: '',
     precoVenda: ''
   }
 
@@ -279,9 +243,7 @@ function validar() {
 
   const nome = form.value.nome.trim()
   const sku = form.value.sku.trim().toUpperCase()
-  const ean = form.value.ean.trim()
 
-  const precoCusto = numeroPreco(form.value.precoCusto)
   const precoVenda = numeroPreco(form.value.precoVenda)
 
   if (!nome) {
@@ -291,22 +253,6 @@ function validar() {
 
   if (!sku) {
     erros.value.sku = 'Informe o SKU.'
-    valido = false
-  }
-
-  const produtos = obterProdutos()
-
-  const skuExiste = produtos.some(
-    produto => produto.sku.toUpperCase() === sku
-  )
-
-  if (skuExiste) {
-    erros.value.sku = 'Este SKU já está cadastrado.'
-    valido = false
-  }
-
-  if (ean && ean.length !== 13) {
-    erros.value.ean = 'O EAN deve possuir 13 números.'
     valido = false
   }
 
@@ -320,26 +266,15 @@ function validar() {
     valido = false
   }
 
-  if (precoCusto < 0) {
-    erros.value.precoCusto = 'Informe um preço válido.'
-    valido = false
-  }
-
-  if (precoVenda <= 0) {
+  if (!(precoVenda > 0)) {
     erros.value.precoVenda = 'Informe um preço de venda válido.'
-    valido = false
-  }
-
-  if (precoCusto > precoVenda) {
-    erros.value.precoVenda =
-      'O preço de venda deve ser maior ou igual ao preço de custo.'
     valido = false
   }
 
   return valido
 }
 
-function salvarProduto() {
+async function salvarProduto() {
   if (!validar()) {
     return
   }
@@ -347,27 +282,16 @@ function salvarProduto() {
   salvando.value = true
 
   try {
-    const produtos = obterProdutos()
-
-    const novoProduto = {
-      id: gerarNovoId(produtos),
+    const novoProduto = await criarProduto({
       sku: form.value.sku.trim().toUpperCase(),
       nome: form.value.nome.trim(),
-      ean: form.value.ean.trim(),
-      categoria: form.value.categoria,
-      unidade: form.value.unidade,
-      precoCusto: form.value.precoCusto,
-      precoVenda: form.value.precoVenda,
-      quantidade: 0,
-      ativo: true,
-      historicoPrecos: []
-    }
+      categoria_id: form.value.categoria,
+      unidade_medida_id: form.value.unidade,
+      preco: numeroPreco(form.value.precoVenda),
+      usuario_id: obterUsuarioLogado()?.id ?? null
+    })
 
-    produtos.push(novoProduto)
-
-    salvarProdutos(produtos)
-
-    selecionarProduto(novoProduto.sku)
+    selecionarProduto(novoProduto.id)
 
     alert('Produto cadastrado com sucesso!')
 
@@ -375,8 +299,11 @@ function salvarProduto() {
   } catch (erro) {
     console.error(erro)
 
-    erroGeral.value =
-      'Não foi possível cadastrar o produto. Tente novamente.'
+    if (erro.codigo === 'SKU_DUPLICADO') {
+      erros.value.sku = 'Este SKU já está cadastrado.'
+    } else {
+      erroGeral.value = erro.message
+    }
 
     salvando.value = false
   }

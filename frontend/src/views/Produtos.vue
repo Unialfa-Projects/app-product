@@ -14,15 +14,15 @@
           Produtos
         </router-link>
 
-        <a href="#" class="menu-item" @click.prevent>
+        <router-link to="/categorias" class="menu-item">
           <span>▤</span>
           Categorias
-        </a>
+        </router-link>
 
-        <a href="#" class="menu-item" @click.prevent>
+        <router-link to="/unidades-medida" class="menu-item">
           <span>◫</span>
           Unidades de medida
-        </a>
+        </router-link>
       </nav>
     </aside>
 
@@ -73,10 +73,10 @@
 
               <option
                 v-for="categoria in categorias"
-                :key="categoria"
-                :value="categoria"
+                :key="categoria.id"
+                :value="categoria.id"
               >
-                {{ categoria }}
+                {{ categoria.nome }}
               </option>
             </select>
           </div>
@@ -95,6 +95,10 @@
             Limpar filtros
           </button>
 
+        </div>
+
+        <div v-if="erro" class="resultado-info erro">
+          {{ erro }}
         </div>
 
         <!-- RESULTADO -->
@@ -170,12 +174,12 @@
                 </td>
 
                 <td>
-                  {{ produto.quantidade ?? 0 }}
+                  {{ produto.estoque ?? 0 }}
                 </td>
 
                 <td>
                   <strong>
-                    R$ {{ produto.precoVenda }}
+                    R$ {{ formatarPreco(produto.preco) }}
                   </strong>
                 </td>
 
@@ -200,7 +204,7 @@
                     <button
                       class="acao"
                       title="Visualizar"
-                      @click="visualizarProduto(produto.sku)"
+                      @click="visualizarProduto(produto.id)"
                     >
                       👁
                     </button>
@@ -208,7 +212,7 @@
                     <button
                       class="acao"
                       title="Editar"
-                      @click="editarProduto(produto.sku)"
+                      @click="editarProduto(produto.id)"
                     >
                       ✎
                     </button>
@@ -220,7 +224,7 @@
                           ? 'Inativar'
                           : 'Ativar'
                       "
-                      @click="alternarStatus(produto.sku)"
+                      @click="alternarStatus(produto.id)"
                     >
                       {{ produto.ativo ? '⊘' : '✓' }}
                     </button>
@@ -261,13 +265,18 @@ import { useRouter } from 'vue-router'
 
 import {
   obterProdutos,
-  salvarProdutos,
-  selecionarProduto
+  obterCategorias,
+  inativarProduto,
+  reativarProduto,
+  selecionarProduto,
+  formatarPreco
 } from '../data/produtos'
 
 const router = useRouter()
 
 const produtos = ref([])
+const categorias = ref([])
+const erro = ref('')
 
 const busca = ref('')
 const categoriaFiltro = ref('')
@@ -277,19 +286,21 @@ onMounted(() => {
   carregarProdutos()
 })
 
-function carregarProdutos() {
-  produtos.value = obterProdutos()
+async function carregarProdutos() {
+  erro.value = ''
+
+  try {
+    const [listaProdutos, listaCategorias] = await Promise.all([
+      obterProdutos(),
+      obterCategorias()
+    ])
+
+    produtos.value = listaProdutos
+    categorias.value = listaCategorias
+  } catch (e) {
+    erro.value = e.message
+  }
 }
-
-const categorias = computed(() => {
-  const lista = produtos.value.map(
-    produto => produto.categoria
-  )
-
-  return [...new Set(lista)]
-    .filter(Boolean)
-    .sort()
-})
 
 const produtosFiltrados = computed(() => {
   const texto = busca.value.trim().toLowerCase()
@@ -303,7 +314,7 @@ const produtosFiltrados = computed(() => {
 
     const correspondeCategoria =
       !categoriaFiltro.value ||
-      produto.categoria === categoriaFiltro.value
+      produto.categoria_id === categoriaFiltro.value
 
     const correspondeSituacao =
       !situacaoFiltro.value ||
@@ -330,22 +341,22 @@ function limparFiltros() {
   situacaoFiltro.value = ''
 }
 
-function visualizarProduto(sku) {
-  selecionarProduto(sku)
+function visualizarProduto(id) {
+  selecionarProduto(id)
 
   router.push('/visualizar-produto')
 }
 
-function editarProduto(sku) {
-  selecionarProduto(sku)
+function editarProduto(id) {
+  selecionarProduto(id)
 
   router.push('/editar-produto')
 }
 
-function alternarStatus(sku) {
+async function alternarStatus(id) {
 
   const produto = produtos.value.find(
-    item => item.sku === sku
+    item => item.id === id
   )
 
   if (!produto) return
@@ -360,9 +371,15 @@ function alternarStatus(sku) {
 
   if (!confirmado) return
 
-  produto.ativo = !produto.ativo
-
-  salvarProdutos(produtos.value)
+  try {
+    if (produto.ativo) {
+      await inativarProduto(id)
+    } else {
+      await reativarProduto(id)
+    }
+  } catch (e) {
+    alert(e.message)
+  }
 
   carregarProdutos()
 }
@@ -733,6 +750,10 @@ select:focus {
   color: #64748b;
 
   font-size: 13px;
+}
+
+.resultado-info.erro {
+  color: #dc2626;
 }
 
 /* =========================================
