@@ -9,9 +9,11 @@ import { produtoCriacaoSchema, produtoAtualizacaoSchema } from '@shared/schemas/
 import { categoriasApi } from '@/api/categorias.js';
 import { unidadesApi } from '@/api/unidades.js';
 import { ErroApi } from '@/api/cliente.js';
+import { opcoesCategoriaHierarquicas } from '@/util/categorias.js';
 
 import Campo from '@/componentes/base/Campo.vue';
 import Select from '@/componentes/base/Select.vue';
+import SelectPesquisavel from '@/componentes/base/SelectPesquisavel.vue';
 import Interruptor from '@/componentes/base/Interruptor.vue';
 import Botao from '@/componentes/base/Botao.vue';
 
@@ -33,13 +35,7 @@ const { data: unidades } = useQuery({
   queryFn: () => unidadesApi.listar({ situacao: 'ativo' }),
 });
 
-const opcoesCategoria = computed(() => [
-  { valor: '', texto: 'Selecione' },
-  ...(categorias.value ?? []).map((c) => ({
-    valor: c.id,
-    texto: c.categoria_pai_nome ? `${c.categoria_pai_nome} > ${c.nome}` : c.nome,
-  })),
-]);
+const opcoesCategoria = computed(() => opcoesCategoriaHierarquicas(categorias.value ?? []));
 const opcoesUnidade = computed(() => [
   { valor: '', texto: 'Selecione' },
   ...(unidades.value ?? []).map((u) => ({ valor: u.id, texto: `${u.nome} (${u.sigla})` })),
@@ -118,7 +114,16 @@ const mensagemErroSku = computed(() => {
     <section class="cartao secao">
       <h2 class="secao__titulo">Classificação</h2>
       <div class="secao__grade-2">
-        <Select id="categoria_id" v-model="categoria_id" rotulo="Categoria" obrigatorio :erro="errors.categoria_id" :opcoes="opcoesCategoria" />
+        <SelectPesquisavel
+          id="categoria_id"
+          v-model="categoria_id"
+          rotulo="Categoria"
+          obrigatorio
+          placeholder="Pesquise ou selecione a categoria"
+          texto-sem-resultado="Nenhuma categoria encontrada"
+          :erro="errors.categoria_id"
+          :opcoes="opcoesCategoria"
+        />
         <Select id="unidade_medida_id" v-model="unidade_medida_id" rotulo="Unidade de medida" obrigatorio :erro="errors.unidade_medida_id" :opcoes="opcoesUnidade" />
       </div>
     </section>

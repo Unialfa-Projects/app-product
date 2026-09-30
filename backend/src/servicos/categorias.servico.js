@@ -54,24 +54,3 @@ export async function atualizar(id, campos) {
 
   return categoriasRepo.atualizar(id, campos);
 }
-
-// RF18 / RN07 — não inativa com produto ativo vinculado
-export async function inativar(id) {
-  await buscarPorId(id);
-
-  const totalAtivos = await categoriasRepo.contarProdutosAtivosVinculados(id);
-  if (totalAtivos > 0) {
-    throw new ErroAplicacao(
-      'CATEGORIA_COM_PRODUTO_ATIVO',
-      [],
-      `Categoria possui ${totalAtivos} produto(s) ativo(s) vinculado(s)`
-    );
-  }
-
-  return categoriasRepo.atualizar(id, { ativo: false });
-}
-
-export async function reativar(id) {
-  await buscarPorId(id);
-  return categoriasRepo.atualizar(id, { ativo: true });
-}

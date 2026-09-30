@@ -74,7 +74,7 @@ export const router = createRouter({
 
 // RF32 — restringe telas de cadastro e consulta a usuário autenticado.
 // Os endpoints de GET da API são públicos por design (só a escrita exige x-usuario-id — RNF03),
-// então só confiar no localStorage deixaria toda tela de consulta acessível com um id forjado
+// então só confiar no id guardado no cliente deixaria toda tela de consulta acessível com um id forjado
 // ou desatualizado. O guard confirma no servidor (GET /api/auth/eu) que o usuário existe de fato.
 router.beforeEach(async (to) => {
   const sessao = useSessaoStore();

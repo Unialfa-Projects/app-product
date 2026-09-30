@@ -60,11 +60,3 @@ export async function atualizar(id, campos) {
   );
   return rows[0] ?? null;
 }
-
-export async function contarProdutosAtivosVinculados(categoriaId) {
-  const { rows } = await pool.query(
-    `SELECT COUNT(*)::int AS total FROM produto WHERE categoria_id = $1 AND ativo = TRUE`,
-    [categoriaId]
-  );
-  return rows[0].total;
-}

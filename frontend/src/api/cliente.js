@@ -12,13 +12,7 @@ export class ErroApi extends Error {
 }
 
 function obterUsuarioId() {
-  try {
-    const bruto = localStorage.getItem('sige.sessao');
-    if (!bruto) return null;
-    return JSON.parse(bruto)?.id ?? null;
-  } catch {
-    return null;
-  }
+  return useSessaoStore().usuario?.id ?? null;
 }
 
 async function requisitar(caminho, { method = 'GET', body, query, autenticado = false } = {}) {

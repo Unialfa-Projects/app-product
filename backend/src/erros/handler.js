@@ -1,4 +1,3 @@
-import { ZodError } from 'zod';
 import { ErroAplicacao } from './erro-aplicacao.js';
 import { CODIGOS_ERRO } from './codigos.js';
 
@@ -8,7 +7,9 @@ function corpoErro(codigo, mensagem, detalhes = []) {
 
 // Handler global (RNF08): toda resposta de erro segue { erro, codigo, detalhes }
 export function handlerGlobalDeErro(erro, request, reply) {
-  if (erro instanceof ZodError) {
+  // Checa pelo nome e não por instanceof: shared/ resolve o zod da raiz e o backend o seu próprio,
+  // então são duas classes ZodError diferentes e o instanceof falharia.
+  if (erro?.name === 'ZodError' && Array.isArray(erro.issues)) {
     const detalhes = erro.issues.map((issue) => ({
       campo: issue.path.join('.'),
       mensagem: issue.message,

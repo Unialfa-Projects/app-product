@@ -14,17 +14,11 @@ const modalPerfilAberto = ref(false);
 
 onMounted(() => {
   // Notebook (1024–1439px) começa recolhida por padrão, como no design; o usuário pode alternar.
-  const preferencia = localStorage.getItem('sige.sidebarRecolhida');
-  if (preferencia !== null) {
-    sidebarRecolhida.value = preferencia === 'true';
-  } else {
-    sidebarRecolhida.value = window.matchMedia('(max-width: 1439px)').matches;
-  }
+  sidebarRecolhida.value = window.matchMedia('(max-width: 1439px)').matches;
 });
 
 function alternarSidebar() {
   sidebarRecolhida.value = !sidebarRecolhida.value;
-  localStorage.setItem('sige.sidebarRecolhida', String(sidebarRecolhida.value));
 }
 </script>
 

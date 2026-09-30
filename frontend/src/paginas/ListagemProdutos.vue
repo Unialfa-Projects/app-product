@@ -8,10 +8,12 @@ import { produtosApi } from '@/api/produtos.js';
 import { categoriasApi } from '@/api/categorias.js';
 import { ErroApi } from '@/api/cliente.js';
 import { useFiltrosStore } from '@/stores/filtros.js';
+import { opcoesCategoriaHierarquicas } from '@/util/categorias.js';
 
 import EstruturaApp from '@/componentes/EstruturaApp.vue';
 import Botao from '@/componentes/base/Botao.vue';
 import Select from '@/componentes/base/Select.vue';
+import SelectPesquisavel from '@/componentes/base/SelectPesquisavel.vue';
 import Badge from '@/componentes/base/Badge.vue';
 import Paginacao from '@/componentes/base/Paginacao.vue';
 import Modal from '@/componentes/base/Modal.vue';
@@ -40,10 +42,7 @@ const { data: categorias } = useQuery({
 
 const opcoesCategoria = computed(() => [
   { valor: '', texto: 'Todas' },
-  ...(categorias.value ?? []).map((c) => ({
-    valor: c.id,
-    texto: c.categoria_pai_nome ? `${c.categoria_pai_nome} > ${c.nome}` : c.nome,
-  })),
+  ...opcoesCategoriaHierarquicas(categorias.value ?? []),
 ]);
 
 const opcoesSituacao = [
@@ -131,10 +130,12 @@ async function confirmarAlternancia() {
         </div>
       </div>
 
-      <Select
+      <SelectPesquisavel
         id="filtro-categoria"
         rotulo="Categoria"
         :model-value="filtros.categoria_id"
+        placeholder="Todas"
+        texto-sem-resultado="Nenhuma categoria encontrada"
         :opcoes="opcoesCategoria"
         @update:model-value="filtros.definirFiltro({ categoria_id: $event, pagina: 1 })"
       />

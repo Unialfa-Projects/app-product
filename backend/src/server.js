@@ -14,6 +14,11 @@ import { unidadesMedidaRotas } from './rotas/unidades-medida.rotas.js';
 
 const fastify = Fastify({ logger: { level: env.LOG_LEVEL } });
 
+// Os schemas das rotas servem só para a documentação OpenAPI: a validação é feita pelo Zod
+// (shared/schemas) e a resposta é serializada como está, sem o Fastify filtrar campos.
+fastify.setValidatorCompiler(() => () => true);
+fastify.setSerializerCompiler(() => (dados) => JSON.stringify(dados));
+
 await fastify.register(helmet, { contentSecurityPolicy: false });
 await fastify.register(cors, {
   origin: env.CORS_ORIGIN.split(',').map((o) => o.trim()),
@@ -37,9 +42,22 @@ await fastify.register(swagger, {
       { name: 'Categorias' },
       { name: 'Unidades de medida' },
     ],
+    components: {
+      securitySchemes: {
+        usuarioId: {
+          type: 'apiKey',
+          in: 'header',
+          name: 'x-usuario-id',
+          description: 'ID do usuário retornado por POST /api/auth/login. Exigido nas rotas de escrita.',
+        },
+      },
+    },
   },
 });
-await fastify.register(swaggerUi, { routePrefix: '/api/docs' });
+await fastify.register(swaggerUi, {
+  routePrefix: '/api/docs',
+  uiConfig: { docExpansion: 'list', persistAuthorization: false },
+});
 
 fastify.setErrorHandler(handlerGlobalDeErro);
 

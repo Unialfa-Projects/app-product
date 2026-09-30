@@ -14,7 +14,6 @@ export const CODIGOS_ERRO = {
   SKU_IMUTAVEL: { status: 409, mensagem: 'O SKU não pode ser alterado após o cadastro' },
   PRODUTO_COM_HISTORICO: { status: 409, mensagem: 'Produto possui histórico de preço e não pode ser excluído' },
   EXCLUSAO_NAO_PERMITIDA: { status: 409, mensagem: 'Exclusão física desabilitada. Utilize a inativação do produto' },
-  CATEGORIA_COM_PRODUTO_ATIVO: { status: 409, mensagem: 'Categoria possui produtos ativos vinculados' },
   NOME_CATEGORIA_DUPLICADO: { status: 409, mensagem: 'Já existe uma categoria com este nome' },
   SIGLA_UNIDADE_DUPLICADA: { status: 409, mensagem: 'Já existe uma unidade de medida com esta sigla' },
   PRODUTO_JA_ATIVO: { status: 409, mensagem: 'O produto já está ativo' },

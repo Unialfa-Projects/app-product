@@ -1,20 +1,10 @@
 import { defineStore } from 'pinia';
 
-const CHAVE_LOCALSTORAGE = 'sige.sessao';
-
-function carregarSessaoSalva() {
-  try {
-    const bruto = localStorage.getItem(CHAVE_LOCALSTORAGE);
-    return bruto ? JSON.parse(bruto) : null;
-  } catch {
-    return null;
-  }
-}
-
 // RF32 — sessão simples identificada pelo cliente (x-usuario-id). Ver P-18: não é controle de acesso real.
+// Mantida só em memória: nada vai para o localStorage, então recarregar a página exige novo login.
 export const useSessaoStore = defineStore('sessao', {
   state: () => ({
-    usuario: carregarSessaoSalva(),
+    usuario: null,
   }),
   getters: {
     estaAutenticado: (state) => Boolean(state.usuario?.id),
@@ -22,11 +12,9 @@ export const useSessaoStore = defineStore('sessao', {
   actions: {
     definirUsuario(usuario) {
       this.usuario = usuario;
-      localStorage.setItem(CHAVE_LOCALSTORAGE, JSON.stringify(usuario));
     },
     encerrarSessao() {
       this.usuario = null;
-      localStorage.removeItem(CHAVE_LOCALSTORAGE);
     },
   },
 });
