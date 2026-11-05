@@ -1,0 +1,72 @@
+:root {
+  /* Cores de marca */
+  --cor-primaria: #2f5fe0;
+  --cor-primaria-hover: #2650c2;
+  --cor-primaria-texto: #ffffff;
+  --cor-sidebar-fundo: #0e1a3a;
+  --cor-sidebar-fundo-alt: #101f45;
+  --cor-sidebar-texto: #b9c2dd;
+  --cor-sidebar-texto-ativo: #ffffff;
+  --cor-sidebar-item-ativo: var(--cor-primaria);
+
+  /* Superfícies */
+  --cor-fundo-pagina: #f4f5f9;
+  --cor-fundo-topo: #faf9f6;
+  --cor-superficie: #ffffff;
+  --cor-borda: #e4e6ec;
+  --cor-borda-forte: #c7cbd6;
+
+  /* Texto */
+  --cor-texto-principal: #16192b;
+  --cor-texto-secundario: #667085;
+  --cor-texto-terciario: #98a1b3;
+  --cor-texto-link: var(--cor-primaria);
+
+  /* Estados semânticos */
+  --cor-sucesso-bg: #e0f8e9;
+  --cor-sucesso-texto: #17864a;
+  --cor-sucesso-ponto: #1fa855;
+  --cor-inativo-bg: #eef0f4;
+  --cor-inativo-texto: #6b7280;
+  --cor-inativo-ponto: #9aa1b1;
+  --cor-erro-bg: #fdecec;
+  --cor-erro-texto: #c62828;
+  --cor-erro-borda: #f2b8b5;
+  --cor-info-bg: #eaf0ff;
+  --cor-info-texto: #2f5fe0;
+  --cor-aviso-bg: #fff6e0;
+  --cor-aviso-texto: #8a6300;
+
+  /* Tipografia */
+  --fonte-base: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --fonte-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+
+  /* Espaçamento */
+  --espaco-1: 4px;
+  --espaco-2: 8px;
+  --espaco-3: 12px;
+  --espaco-4: 16px;
+  --espaco-5: 20px;
+  --espaco-6: 24px;
+  --espaco-8: 32px;
+  --espaco-10: 40px;
+
+  /* Raio e sombra */
+  --raio-sm: 6px;
+  --raio-md: 10px;
+  --raio-lg: 14px;
+  --sombra-card: 0 1px 2px rgba(16, 24, 40, 0.04);
+  --sombra-flutuante: 0 8px 24px rgba(16, 24, 40, 0.12);
+
+  /* Layout */
+  --largura-sidebar: 256px;
+  --largura-sidebar-rail: 72px;
+  --altura-topbar: 64px;
+  --altura-bottomnav: 64px;
+
+  /* Breakpoints (referência para comentários; media queries usam valores literais) */
+  --bp-mobile: 428px;
+  --bp-tablet: 884px;
+  --bp-notebook: 1280px;
+  --bp-desktop: 1440px;
+}
