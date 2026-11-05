@@ -1,10 +1,10 @@
-# SIGE — Módulo Produtos
+# Módulo Produtos
 
 Cadastro central de produtos para um e-commerce de variedades: produtos, categorias (com subcategorias), unidades de medida, histórico de preço e autenticação simples por e-mail/senha.
 
 Stack: **Node.js 22 + Fastify 5 + PostgreSQL 16** (API) e **Vue 3 + Vite** (front-end), com SQL explícito via `pg` (sem ORM) e validação única via **Zod** compartilhada entre back-end e formulários.
 
-## Subir tudo com Docker (recomendado)
+## Subir com Docker
 
 Pré-requisito: Docker Desktop instalado e em execução.
 

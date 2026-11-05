@@ -1,0 +1,37 @@
+{
+  "observacao": "Autenticacao bem simples, sem bcrypt e sem JWT: cadastro salva a senha como veio e login apenas compara email/senha, devolvendo o usuario (com o id). Estas rotas nao exigem Authorization e nao interferem nas chaves GESTOR_API_KEY/OPERADOR_API_KEY usadas por produtos, categorias e unidades.",
+
+  "cadastro_POST_/api/usuarios": {
+    "corpo_da_requisicao": {
+      "nome": "Ana Silva",
+      "email": "ana@exemplo.com",
+      "senha": "senha123"
+    },
+    "resposta_201": {
+      "id": 1,
+      "nome": "Ana Silva",
+      "email": "ana@exemplo.com",
+      "criado_em": "2026-09-17",
+      "atualizado_em": "2026-09-17"
+    }
+  },
+
+  "login_POST_/api/usuarios/login": {
+    "corpo_da_requisicao": {
+      "email": "ana@exemplo.com",
+      "senha": "senha123"
+    },
+    "resposta_200": {
+      "id": 1,
+      "nome": "Ana Silva",
+      "email": "ana@exemplo.com",
+      "criado_em": "2026-09-17",
+      "atualizado_em": "2026-09-17"
+    },
+    "resposta_401_credenciais_erradas": {
+      "erro": "Email ou senha incorretos",
+      "codigo": "CREDENCIAIS_INVALIDAS",
+      "detalhes": []
+    }
+  }
+}

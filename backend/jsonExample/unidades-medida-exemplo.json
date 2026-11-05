@@ -1,0 +1,22 @@
+[
+  {
+    "nome": "Unidade",
+    "sigla": "UN"
+  },
+  {
+    "nome": "Quilograma",
+    "sigla": "KG",
+    "descricao": "Usado para produtos vendidos a granel, por peso",
+    "casas_decimais": 3
+  },
+  {
+    "nome": "Litro",
+    "sigla": "L",
+    "descricao": "Usado para produtos liquidos",
+    "casas_decimais": 3
+  },
+  {
+    "nome": "Caixa",
+    "sigla": "CX"
+  }
+]
