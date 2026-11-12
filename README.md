@@ -129,18 +129,3 @@ app-product/
 ├── desing-wireframe-produto/   # Wireframes das telas (PNG)
 └── docs/                       # Documentação do projeto (ver seção "Documentação")
 ```
-
-> Em `backend/src` e `frontend/src` ainda existem pastas de uma versão anterior que não são usadas pela aplicação atual: `controllers/`, `routes/`, `repositories/`, `models/`, `database/`, `app.js` (backend) e `router/`, `views/`, `components/`, `data/` (frontend). Os pontos de entrada ativos são `backend/src/server.js` e `frontend/src/main.js`.
-
-## O que está implementado
-
-- **Produtos**: cadastro, edição, listagem paginada e filtrável (nome, SKU, categoria, situação), inativação/reativação, exclusão física bloqueada por padrão (histórico de preço é preservado), histórico de preço completo.
-- **Categorias**: hierarquia com subcategorias, inativação bloqueada quando há produto ativo vinculado.
-- **Unidades de medida**: cadastro e listagem.
-- **Autenticação simples**: cadastro e login por e-mail/senha (hash bcrypt), sem JWT/perfis — a sessão é identificada pelo header `x-usuario-id` enviado pelo front-end. Isso é suficiente para o escopo do projeto, mas **não é controle de acesso real** (qualquer cliente poderia enviar outro id).
-- **Front-end**: nove telas responsivas (1440/1280/884/412 px), com estados de carregando, vazio, erro e sucesso, fiéis ao design em `desing-wireframe-produto/`.
-- **API**: erros padronizados (`{ erro, codigo, detalhes }`), OpenAPI 3 em `/api/docs`.
-
-## O que não está incluído
-
-Collection do Postman e cobertura completa de testes automatizados não foram construídas nesta entrega — o foco foi ter o sistema funcionando, fiel ao design e pronto para uso via Docker. O planejamento de testes está na [Documentação de Testes](docs/Documenta%C3%A7%C3%A3o%20de%20testes.pdf).
